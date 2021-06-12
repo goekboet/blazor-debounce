@@ -1,0 +1,18 @@
+@inject IJSRuntime JSRuntime
+
+@inherits Microsoft.AspNetCore.Components.Forms.InputText
+<input @ref="Reference" type="text" @attributes="@AdditionalAttributes" @bind="@CurrentValueAsString" @bind:event="oninput" />
+
+@code {
+    [Parameter]
+    public ElementReference Reference {get;set;}
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await JSRuntime.DebounceEvent(Reference, "input", TimeSpan.FromMilliseconds(500));
+        }
+    }
+}

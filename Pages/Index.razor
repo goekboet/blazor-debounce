@@ -1,11 +1,51 @@
 @page "/"
+@inject IJSRuntime JSRuntime
+
+<style>
+.component {
+    display: flex;
+    flex-direction: column;
+    width: 32rem;
+    margin: 4rem auto 4rem auto;
+}
+
+form {
+    width: 100%;
+    margin-bottom: 2rem;
+    display: flex;
+
+}
+form input[type="text"] {
+    flex-grow: 1;
+}
+
+ul {
+    display: flex;
+    flex-direction: column;
+}
+
+ul li {
+    display: flex;
+}
+
+.timestamp {
+    width: 8rem;
+}
+
+.input {
+    flex-grow: 1;
+}
+</style>
 
 <div class="component">
-<form>
-    <input type="text" @oninput="OnInput" />
+@* <form>
+    <input @ref="debouncedInput" type="text" @bind="Input" @bind:event="oninput"/>
     <input type="submit" value="Clear" @onclick:preventDefault @onclick="Clear" />
-</form>
-
+</form> *@
+<EditForm EditContext="@EditContext" OnInvalidSubmit="@Clear" >
+    <OnInputText Reference="debouncedInput" @bind-Value="Model.Input"  />
+    <input type="submit" value="Clear" />
+</EditForm>
 <ul>
     @foreach (var item in Processed)
     {
@@ -15,12 +55,26 @@
 </div>
 
 @code {
+    private EditContext EditContext;
+    public IndexModel Model {get;set;} = new();
+    ElementReference debouncedInput;
+
+    string _value = "";
+    public string Input 
+    {
+        get => _value;
+        set 
+        {
+            var p = (DateTimeOffset.Now, value);
+            Processed.Insert(0, p);
+            _value = value;
+        }
+    }
 
     public void OnInput(ChangeEventArgs e)
     {
         var p = (DateTimeOffset.Now, e.Value?.ToString() ?? "");
         Processed.Insert(0, p);
-        @* StateHasChanged(); *@
     }
 
     public void Clear()
@@ -31,4 +85,23 @@
     string Timestamp(DateTimeOffset ts) => ts.UtcDateTime.ToString("HH:mm:ss:fff");
     public List<(DateTimeOffset, string)> Processed { get; set; } = 
         new List<(DateTimeOffset, string)>();
+
+    
+
+    private void EditContext_OnFieldChanged(
+        object sender, 
+        FieldChangedEventArgs e)
+    {
+        Console.WriteLine(e.FieldIdentifier.FieldName);
+        var p = (DateTimeOffset.Now, Model.Input);
+        Processed.Insert(0, p);
+    }
+
+    protected override void OnInitialized()
+    {
+        EditContext = new EditContext(Model);
+        EditContext.OnFieldChanged += EditContext_OnFieldChanged;
+
+        base.OnInitialized();
+    }
 }
