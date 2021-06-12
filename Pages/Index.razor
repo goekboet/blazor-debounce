@@ -1,0 +1,34 @@
+@page "/"
+
+<div class="component">
+<form>
+    <input type="text" @oninput="OnInput" />
+    <input type="submit" value="Clear" @onclick:preventDefault @onclick="Clear" />
+</form>
+
+<ul>
+    @foreach (var item in Processed)
+    {
+        <li><span class="timestamp">@Timestamp(item.Item1)</span><span class="input">@item.Item2</span></li>
+    }
+</ul>
+</div>
+
+@code {
+
+    public void OnInput(ChangeEventArgs e)
+    {
+        var p = (DateTimeOffset.Now, e.Value?.ToString() ?? "");
+        Processed.Insert(0, p);
+        @* StateHasChanged(); *@
+    }
+
+    public void Clear()
+    {
+        Processed.Clear();
+    }
+
+    string Timestamp(DateTimeOffset ts) => ts.UtcDateTime.ToString("HH:mm:ss:fff");
+    public List<(DateTimeOffset, string)> Processed { get; set; } = 
+        new List<(DateTimeOffset, string)>();
+}
