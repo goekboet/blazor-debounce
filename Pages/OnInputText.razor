@@ -4,7 +4,6 @@
 <input @ref="Reference" type="text" @attributes="@AdditionalAttributes" @bind="@CurrentValueAsString" @bind:event="oninput" />
 
 @code {
-    [Parameter]
     public ElementReference Reference {get;set;}
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

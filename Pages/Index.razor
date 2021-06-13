@@ -1,5 +1,4 @@
 @page "/"
-@inject IJSRuntime JSRuntime
 
 <style>
 .component {
@@ -38,12 +37,8 @@ ul li {
 </style>
 
 <div class="component">
-@* <form>
-    <input @ref="debouncedInput" type="text" @bind="Input" @bind:event="oninput"/>
-    <input type="submit" value="Clear" @onclick:preventDefault @onclick="Clear" />
-</form> *@
-<EditForm EditContext="@EditContext" OnInvalidSubmit="@Clear" >
-    <OnInputText Reference="debouncedInput" @bind-Value="Model.Input"  />
+<EditForm EditContext="@EditContext" OnSubmit="@Clear" >
+    <OnInputText @bind-Value="Model.Input"  />
     <input type="submit" value="Clear" />
 </EditForm>
 <ul>
@@ -57,28 +52,10 @@ ul li {
 @code {
     private EditContext EditContext;
     public IndexModel Model {get;set;} = new();
-    ElementReference debouncedInput;
-
-    string _value = "";
-    public string Input 
-    {
-        get => _value;
-        set 
-        {
-            var p = (DateTimeOffset.Now, value);
-            Processed.Insert(0, p);
-            _value = value;
-        }
-    }
-
-    public void OnInput(ChangeEventArgs e)
-    {
-        var p = (DateTimeOffset.Now, e.Value?.ToString() ?? "");
-        Processed.Insert(0, p);
-    }
 
     public void Clear()
     {
+        Console.WriteLine($"Model.Input: {Model.Input}");
         Processed.Clear();
     }
 
@@ -86,13 +63,10 @@ ul li {
     public List<(DateTimeOffset, string)> Processed { get; set; } = 
         new List<(DateTimeOffset, string)>();
 
-    
-
     private void EditContext_OnFieldChanged(
         object sender, 
         FieldChangedEventArgs e)
     {
-        Console.WriteLine(e.FieldIdentifier.FieldName);
         var p = (DateTimeOffset.Now, Model.Input);
         Processed.Insert(0, p);
     }

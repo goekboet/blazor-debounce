@@ -5,6 +5,8 @@ using Microsoft.JSInterop;
 
 namespace debounced_blazor
 {
+    // Adapted from
+    // https://www.meziantou.net/debouncing-throttling-javascript-events-in-a-blazor-application.htm
     public static class InputDebounce
     {
         public static async Task DebounceEvent(
